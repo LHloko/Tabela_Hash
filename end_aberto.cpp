@@ -1,4 +1,4 @@
-#include "end_aberto.h"
+#include "end_fechado.h"
 
 int Hash::hash(int valor){
     return valor%cap;
@@ -6,82 +6,57 @@ int Hash::hash(int valor){
 
 Hash::Hash(int tamanho){
     cap = tamanho;
-    vector<int> tab(cap, -1);
-    tabela = tab;
+    vector<vector<int>> t(cap, vector<int>(0, 0));
+    tabela = t;
 }
 
 Hash::~Hash(){
     for(int i=0; i<cap; i++)
-        tabela.pop_back();
+        for(int j=0; j<tabela[i].size(); j++)
+            tabela[i].pop_back();
 }
 
 bool Hash::buscar(int valor){
     int chave = hash(valor);
+    
+    if(tabela[chave].empty()) //retorna falso caso nao tenha nenhum item na lista
+        return false;
 
-    //Buscar partindo da chave
-    //Encontrar -1 sai, -2 prossegue
-    //Voltar para posição chave sai
-
-    while(tabela[chave] != -1){
-        if(tabela[chave] == valor)
-            return true;
-        
-        chave = (chave + 1)%cap;
-
-        if(chave == hash(valor))
-            break;
-    }
+    for(int i=0; i<tabela[chave].size(); i++)
+        if(tabela[chave][i] == valor)
+            return true;    
 
     return false;
 }
 
 bool Hash::inserir(int valor){
     int chave = hash(valor);
-
-    //Entro na posição chave
-    //Se for < 0 saio do loop e insiro na posição
-    //Se a chave voltar pro inicio retorno falso
-
-    while(tabela[chave] > 0){
-        chave = (chave + 1)%cap;
-        
-        if(chave == hash(valor))
-            return false;
-    }
-    tabela[chave] = valor;
+    tabela[chave].push_back(valor);
     return true;
 }
 
 bool Hash::remover(int valor){
     int chave = hash(valor);
+    
+    if(tabela[chave].empty()) //retorna falso caso nao tenha nenhum item na lista
+        return false;
 
-    //Procuro o valor enquanto não encontrar -1
-    //Se achar inserir na posição -2
-    //Se chave voltar pro inicio retorna falso
-
-    while(tabela[chave] != -1){
-        if(tabela[chave] == valor){
-            if(tabela[(chave + 1)%cap] == -1)
-                tabela[chave] = -1;
-            else
-                tabela[chave] = -2;
-            
+    for(int i=0; i<tabela[chave].size(); i++)
+        if(tabela[chave][i] == valor){
+            tabela[chave].erase(tabela[chave].begin()+i); //tem jeito melhor de fazer isso ? 
             return true;
         }
-
-        chave = (chave + 1)%cap;
-
-        if(chave == hash(valor))
-            break;
-    }
 
     return false;
 }
 
-void Hash::exibir(){
-    for(auto i: tabela)
-        cout<< i<<" ";
-    cout<<endl;
-    
-    return;
+bool Hash::exibir(){
+    //vou fazer o algoritmo virar n², infelizmente :D 
+    for(int i=0; i<cap; i++){
+        cout<<"[ %i ] ",i;
+        
+        for(auto j: tabela[i])
+            cout<<j<<" ";
+        cout<<endl;
+    }
 }
